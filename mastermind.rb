@@ -7,7 +7,7 @@ class Maker
 end
 
 class Breaker
-    
+
     def initialize
         
     end
@@ -22,6 +22,7 @@ class Game
     end
 
 end  
+
 
 game = Game.new
 game.play
