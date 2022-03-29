@@ -20,12 +20,57 @@ end
 class Breaker
 
     def initialize
+        @number_of_guesses = 12
+        @hint_correct_number = 0
+        @hint_correct_position = 0
+    end
+
+    def guess(code)
+        if @number_of_guesses >=1 
+            puts "Please type your guess"
+            while guess = gets.chomp
+                case 
+                when guess.length == 4 
+                    array_guess = guess.split("").map(&:to_i)
+                    @number_of_guesses -= 1
+                    guess_correct?(array_guess, code)
+                    break    
+                else 
+                    puts "Invalid response, please try again"
+                end
+            end
+        else 
+            print "You're all out of guesses, game over, better luck next time"
+        end
+    end
+
+    def hint(guess, code)
+        print "  Hint: "
+        guess.each_with_index do |value, key|
+            if value == code[key]
+                print "\u{2B24} " #filled in circle
+            elsif value != code[key] && code.include?(value)
+                print "\u{25CD} " #half shaded circle
+            else
+                print "\u{25EF} " #empty circle
+            end
+        end
+    end
+
+    def guess_correct?(guess, code)
+        print guess
+        if guess == code
+            puts " Correct, you win!"
+        else 
+            hint(guess, code)
+            puts "  You have #{@number_of_guesses} guesses left"
+            guess(code)
+        end
     end
 
     def play(selection, code)
         if selection == "user"
-            print code
-            print "no work"
+            guess(code)
         elsif selection == "computer"
             puts "not coded yet"
         end
@@ -53,7 +98,7 @@ puts "Example:"
             when selection == "m" 
                 #this not implemented yet, will need work
                 @maker.play("user")
-                @breaker.play("computer")
+                @breaker.play("computer", @maker.code)
                 break
             when selection == "b"
                 @maker.play("computer")
