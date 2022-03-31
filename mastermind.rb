@@ -5,13 +5,33 @@ attr_reader :code
         @code = nil
     end
 
+    def valid_code?(code)
+        if code.length >= 5 || code.length <= 3
+            false
+        elsif code.count("a-zA-Z") > 0 || code.count("0") > 0
+            false
+        else 
+            true
+        end
+    end
+
     def play(selection)
         if selection == "computer"
             @computer_code = (4.times.map {@possible_numbers.sample})
             @code = @computer_code
             print @code
         elsif selection == "user"
-            puts "not coded yet"
+            puts "Please type your 4 digit code, made from numbers 1-6"
+            while @user_code = gets.chomp.gsub(/\W/, "0")
+                case
+                when valid_code?(@user_code) == false
+                    puts "invalid code, please try again"
+                else
+                    @code = @user_code.split("").map{|string| string.to_i}
+                    #print @code
+                    break
+                end
+            end
         end
     end
 
@@ -23,6 +43,9 @@ class Breaker
         @number_of_guesses = 12
         @hint_correct_number = 0
         @hint_correct_position = 0
+        @computer_guesses = 1
+        @computer_start_guess = [1, 1, 2, 2]
+        @all_possible_codes = Array(1111..6666)
     end
 
     def guess(code)
@@ -68,11 +91,28 @@ class Breaker
         end
     end
 
+    def computer_guess(code)
+        @guess = @computer_start_guess
+        
+        until @guess == code
+            puts "Computer guess #{@computer_guesses}"
+            #logic to get the computer to guess & get hints
+            print @guess
+            hint(@guess, code)
+            #use @all_possible_codes
+
+
+            @computer_guesses += 1
+            break if @computer_guesses == 13
+        end
+        puts "Game over!"
+    end
+
     def play(selection, code)
         if selection == "user"
             guess(code)
         elsif selection == "computer"
-            puts "not coded yet"
+            computer_guess(code)
         end
     end
 
