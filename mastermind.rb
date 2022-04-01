@@ -8,6 +8,8 @@ attr_reader :code
     def valid_code?(code)
         if code.length >= 5 || code.length <= 3
             false
+        elsif code.include?("7") || code.include?("8") || code.include?("9")
+            false
         elsif code.count("a-zA-Z") > 0 || code.count("0") > 0
             false
         else 
@@ -19,7 +21,6 @@ attr_reader :code
         if selection == "computer"
             @computer_code = (4.times.map {@possible_numbers.sample})
             @code = @computer_code
-            print @code
         elsif selection == "user"
             puts "Please type your 4 digit code, made from numbers 1-6"
             while @user_code = gets.chomp.gsub(/\W/, "0")
@@ -28,7 +29,6 @@ attr_reader :code
                     puts "invalid code, please try again"
                 else
                     @code = @user_code.split("").map{|string| string.to_i}
-                    #print @code
                     break
                 end
             end
@@ -46,6 +46,7 @@ class Breaker
         @computer_guesses = 1
         @computer_start_guess = [1, 1, 2, 2]
         @all_possible_codes = Array(1111..6666)
+        @guess = nil
     end
 
     def guess(code)
@@ -91,21 +92,38 @@ class Breaker
         end
     end
 
+    def logic(guess, code)
+        guess.each_with_index do |value, index|
+            if !code.include?(value)
+                @all_possible_codes.delete_if {|item| item.digits.member?(value)}
+            elsif code.include?(value) && value != code[index]
+                @all_possible_codes.delete_if do |item| 
+                    array = item.digits.reverse
+                    array[index] == value
+                end
+            end    
+        end    
+    end
+
     def computer_guess(code)
         @guess = @computer_start_guess
         
-        until @guess == code
-            puts "Computer guess #{@computer_guesses}"
-            #logic to get the computer to guess & get hints
+        until @guess == code || @computer_guesses == 13
+            puts "\n" "Computer guess #{@computer_guesses}"
             print @guess
             hint(@guess, code)
             #use @all_possible_codes
-
-
+            logic(@guess, code)
+            @guess = @all_possible_codes[0].to_s.split("").map{|string| string.to_i}
             @computer_guesses += 1
-            break if @computer_guesses == 13
         end
-        puts "Game over!"
+        if @guess == code
+            puts "\nComputer guess #{@computer_guesses}"
+            print "#{@guess} Correct"
+            puts "\nGame over, the computer wins!"
+        else 
+            puts "\n" "Game over, the computer couldn't guess, you win!"
+        end
     end
 
     def play(selection, code)
