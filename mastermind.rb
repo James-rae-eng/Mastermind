@@ -34,11 +34,9 @@ attr_reader :code
             end
         end
     end
-
 end
 
 class Breaker
-
     def initialize
         @number_of_guesses = 12
         @hint_correct_number = 0
@@ -46,6 +44,7 @@ class Breaker
         @computer_guesses = 1
         @computer_start_guess = [1, 1, 2, 2]
         @all_possible_codes = Array(1111..6666)
+        @all_possible_codes.delete_if {|x| x.digits.member?(0)}
         @guess = nil
     end
 
@@ -107,12 +106,10 @@ class Breaker
 
     def computer_guess(code)
         @guess = @computer_start_guess
-        
         until @guess == code || @computer_guesses == 13
             puts "\n" "Computer guess #{@computer_guesses}"
             print @guess
             hint(@guess, code)
-            #use @all_possible_codes
             logic(@guess, code)
             @guess = @all_possible_codes[0].to_s.split("").map{|string| string.to_i}
             @computer_guesses += 1
@@ -133,20 +130,55 @@ class Breaker
             computer_guess(code)
         end
     end
-
 end
 
-
 class Game 
-puts "Welcome to Mastermind"
-puts "How to play:"
-puts "Example:"
+puts "\n\e[1m\e[4mWelcome to Mastermind\e[0m"
+puts "\n\e[4mHow to play\e[0m:
+In this game you play against the computer and the object is to 
+either break the code the computer has set, or make a code yourself for the 
+computer to break.
+
+The code MAKER types in a 4 digit code, comprising only numbers 1-6, numbers
+can be repeated, but ony whole numbers can be used.
+
+The code BREAKER must attempt to guess the code within 12 guesses and will get a
+hint after each guess.
+
+A hint consists of 4 circles which translate to the following:
+-A full circle means the number guessed is correct, and in the correct position.
+-A half filled circle means the number guessed is included somewhere in the makers
+ code but is not in the correct position.
+-An empty circle means that the number is not included in the makers code."
+puts "\n\e[4mExample game\e[0m:
+Makers code:
+1665
+
+Breakers code guesses:
+1234
+[1, 2, 3, 4]  Hint \u{2B24} \u{25EF} \u{25EF} \u{25EF}   11 guesses left
+1566
+[1, 5, 6, 6]  Hint \u{2B24} \u{25CD} \u{25CD} \u{25CD}   10 guesses left
+1665
+[1, 6, 6, 5]  Hint \u{2B24} \u{2B24} \u{2B24} \u{2B24}   Correct, game won!\n"
 
     def initialize
         @maker = Maker.new
         @breaker = Breaker.new
     end
 
+    def replay_game
+        puts "\nWould you like to play again? Enter y / n"
+        choice = gets.chomp.to_s.downcase
+        if choice == "y"
+            game = Game.new
+            game.start
+        elsif choice == "n"
+            puts "Thanks for playing!"
+        else
+            puts "Invalid selection"
+        end
+    end
 
     def start
         puts "Would you like to be the code Maker or the code Breaker?"
@@ -166,10 +198,9 @@ puts "Example:"
                 puts "Invalid choice please type m or b"
             end
         end
+        replay_game()
     end
-
 end  
-
 
 game = Game.new
 game.start
